@@ -249,7 +249,102 @@ Audit trails are essential for approval and rejection actions.
 Notifications:																									
 Consider implementing email or in-app notifications to notify requesters of approval or rejection.																									
 *******************************************																									
-																									
+Table Name	Column Name	Data Type	Constraints/Notes	
+AnnualOperatingPlans	AOPID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	AOPName	VARCHAR(255)	NOT NULL, UNIQUE	
+	FiscalYear	INT	NOT NULL	
+	Amount	DECIMAL(19, 2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+	Status	ENUM('Draft', 'Active', 'EOL')	NOT NULL, DEFAULT 'Draft'	
+	CreatedByUserID	INT	FOREIGN KEY to Employees(EmployeeID)	
+	CreatedAt	DATETIME	DEFAULT CURRENT_TIMESTAMP	
+	LastUpdatedByUserID	INT	FOREIGN KEY to Employees(EmployeeID)	
+	LastUpdatedAt	DATETIME	DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP	
+AnnualOperatingPlanDetails	AOPDetailID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	AOPID	INT	FOREIGN KEY to AnnualOperatingPlans(AOPID)	
+	CostCenterCode	VARCHAR(50)	FOREIGN KEY to CostCenters(CostCenterCode)	
+	Amount	DECIMAL(19, 2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+CostCenters	CostCenterCode	VARCHAR(50)	PRIMARY KEY	
+	CostCenterName	VARCHAR(255)	NOT NULL	
+Employees	EmployeeID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	LDAP	VARCHAR(255)	NOT NULL, UNIQUE	
+	FirstName	VARCHAR(255)	NOT NULL	
+	LastName	VARCHAR(255)	NOT NULL	
+	Email	VARCHAR(255)	NOT NULL	
+	Level	INT	NOT NULL, CHECK (Level BETWEEN 1 AND 12)	
+	CostCenterCode	VARCHAR(50)	FOREIGN KEY to CostCenters(CostCenterCode)	
+OrganizationHierarchy	HierarchyID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	ManagerEmployeeID	INT	FOREIGN KEY to Employees(EmployeeID)	
+	ReportToEmployeeID	INT	FOREIGN KEY to Employees(EmployeeID)	
+Budgets	BudgetID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	AOPID	INT	FOREIGN KEY to AnnualOperatingPlans(AOPID)	
+	Department ID	INT	FOREIGN KEY to Departments(DEPID)	
+	EmployeeID	INT	FOREIGN KEY to Employees(EmployeeID)	
+	Category	VARCHAR(255)	NOT NULL	
+	Description	TEXT		
+	Amount	DECIMAL(19, 2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+	Status	ENUM('Active', 'Inactive')	NOT NULL, DEFAULT 'Active'	
+	PurchaseRequisitionAmount	DECIMAL(19, 2)	DEFAULT 0	
+	PurchaseOrderAmount	DECIMAL(19, 2)	DEFAULT 0	
+	ReceiptAmount	DECIMAL(19, 2)	DEFAULT 0	
+BudgetItems	ItemID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	BudgetID	INT	FOREIGN KEY to Budgets	
+	ItemName	VARCHAR(255)	FOREIGN KEY to BudgetCategories	
+	Person responsible	VARCHAR(255)		
+	Description	TEXT		
+	Amount	DECIMAL(19, 2)		
+	Currency	VARCHAR(3) DEFAULT 'USD'		
+Departments	DepartmentID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	DepartmentName	VARCHAR(255)	NOT NULL, UNIQUE	
+	Description	TEXT		
+PurchaseRequests	PurchaseRequestID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	BudgetID	INT	FOREIGN KEY to Budgets(BudgetID)	
+	RequestorLDAP	VARCHAR(255)	FOREIGN KEY to Employees(LDAP)	
+	RequisitionAmount	DECIMAL(19, 2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+	RequestDate	DATE	NOT NULL	
+	Status	ENUM('Requested', 'Approved')	NOT NULL	
+PurchaseOrders	PurchaseOrderID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	BudgetID	INT	FOREIGN KEY to Budgets(BudgetID)	
+	PurchaseOrderNumber	VARCHAR(255)	NOT NULL	
+	PurchaseOrderLineNumber	INT	NOT NULL	
+	RequestorLDAP	VARCHAR(255)	FOREIGN KEY to Employees(LDAP)	
+	PurchaseItem	VARCHAR(255)	NOT NULL	
+	Amount	DECIMAL(19, 2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+	Status	ENUM('Pending Approval', 'Approved')	NOT NULL	
+	OrderDate	DATE	NOT NULL	
+Expenses	ExpenseID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	PurchaseOrderNumber	VARCHAR(255)	NOT NULL	
+	PurchaseOrderLineNumber	INT	NOT NULL	
+	PurchaseItem	VARCHAR(255)	NOT NULL	
+	Amount	DECIMAL(19,2)	NOT NULL	
+	Currency	VARCHAR(3) DEFAULT 'USD'	(e.g., 'USD', 'EUR', 'GBP')	
+	ReceiptDate	DATE	NOT NULL	
+BudgetTransfers	TransferID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	FromBudgetID	INT	FOREIGN KEY to Budgets	
+	ToBudgetID	INT	FOREIGN KEY to Budgets	
+	TransferAmount	DECIMAL(19, 2)	NOT NULL	
+	Currency			
+	TransferDate	DATE	NOT NULL	
+	Reason	TEXT		
+	Created by			
+	Approved By			
+BudgetAudit	AuditID	INT	PRIMARY KEY, AUTO_INCREMENT	
+	BudgetID	INT	FOREIGN KEY to Budgets	
+	UserID	INT	FOREIGN KEY to Users	
+	ChangeDate	DATETIME	DEFAULT CURRENT_TIMESTAMP	
+	OldRequested...	DECIMAL(19,2)		
+	NewRequested...	DECIMAL(19,2)		
+	OldApproved...	DECIMAL(19,2)		
+	NewApproved...	DECIMAL(19,2)		
+	OldStatus	ENUM(...)	See Budgets table	
+	NewStatus	ENUM(...)	See Budgets table	
+	Notes	TEXT		
+				
+																												
 																									
 																									
 																									
